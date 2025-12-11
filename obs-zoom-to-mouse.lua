@@ -50,6 +50,8 @@ local is_following_mouse = false
 local follow_speed = 0.1
 local follow_border = 0
 local follow_safezone_sensitivity = 10
+local lock_stability_frames = 3
+local lock_counter = 0
 local use_follow_auto_lock = false
 local zoom_value = 2
 local zoom_speed = 0.1
@@ -820,6 +822,7 @@ end
 function on_toggle_follow(pressed)
     if pressed then
         is_following_mouse = not is_following_mouse
+        lock_counter = 0
         log("Tracking mouse is " .. (is_following_mouse and "on" or "off"))
 
         if is_following_mouse and zoom_state == ZoomState.ZoomedIn then
@@ -844,6 +847,7 @@ function on_toggle_zoom(pressed)
                 zoom_time = 0
                 locked_center = nil
                 locked_last_pos = nil
+                lock_counter = 0
                 zoom_target = { crop = crop_filter_info_orig, c = sceneitem_crop_orig }
                 if is_following_mouse then
                     is_following_mouse = false
@@ -857,6 +861,7 @@ function on_toggle_zoom(pressed)
                 zoom_time = 0
                 locked_center = nil
                 locked_last_pos = nil
+                lock_counter = 0
                 zoom_target = get_target_position(zoom_info)
             end
 
@@ -960,12 +965,19 @@ function on_timer()
                                 end
                             end
 
+                            -- Increment stability counter only when lock condition or small diff hold
                             if (lock and use_follow_auto_lock) or (diff.x <= follow_safezone_sensitivity and diff.y <= follow_safezone_sensitivity) then
-                                -- Make the new center the position of the current camera (which might not be the same as the mouse since we lerp towards it)
+                                lock_counter = lock_counter + 1
+                            else
+                                lock_counter = 0
+                            end
+
+                            if lock_counter >= lock_stability_frames then
                                 locked_center = {
                                     x = math.floor(crop_filter_info.x + zoom_target.crop.w * 0.5),
                                     y = math.floor(crop_filter_info.y + zoom_target.crop.h * 0.5)
                                 }
+                                lock_counter = 0
                                 log("Cursor stopped. Tracking locked to " .. locked_center.x .. ", " .. locked_center.y)
                             end
                         end
@@ -1168,7 +1180,7 @@ function script_properties()
     local follow_border = obs.obs_properties_add_int_slider(props, "follow_border", "Follow Border", 0, 50, 1)
     local safezone_sense = obs.obs_properties_add_int_slider(props,
         "follow_safezone_sensitivity", "Lock Sensitivity", 1, 20, 1)
-    local follow_auto_lock = obs.obs_properties_add_bool(props, "follow_auto_lock", "Auto Lock on reverse direction ")
+        local follow_auto_lock = obs.obs_properties_add_bool(props, "follow_auto_lock", "Auto Lock on reverse direction")
     obs.obs_property_set_long_description(follow_auto_lock,
         "When enabled moving the mouse to edge of the zoom source will begin tracking,\n" ..
         "but moving back towards the center will stop tracking simliar to panning the camera in a RTS game")
