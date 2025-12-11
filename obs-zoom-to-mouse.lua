@@ -189,8 +189,39 @@ function get_dc_info()
             prop_type = "string"
         }
     elseif ffi.os == "Linux" then
+        -- OBS 28.0+ uses PipeWire for Wayland, xcomposite for X11
+        -- Try to detect which capture source is available
+        local sources = obs.obs_enum_sources()
+        local available_source = nil
+        
+        if sources ~= nil then
+            -- Priority: pipewire (Wayland/modern) > xcomposite (X11) > xshm (legacy)
+            local preferred_sources = {
+                "pipewire-desktop-capture-source",
+                "xcomposite_input",
+                "xshm_input"
+            }
+            
+            for _, preferred in ipairs(preferred_sources) do
+                for _, source in ipairs(sources) do
+                    if obs.obs_source_get_id(source) == preferred then
+                        available_source = preferred
+                        break
+                    end
+                end
+                if available_source then break end
+            end
+            
+            obs.source_list_release(sources)
+        end
+        
+        -- Fallback to pipewire if none was detected
+        if not available_source then
+            available_source = "pipewire-desktop-capture-source"
+        end
+        
         return {
-            source_id = "xshm_input",
+            source_id = available_source,
             prop_id = "screen",
             prop_type = "int"
         }

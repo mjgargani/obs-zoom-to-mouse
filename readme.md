@@ -4,14 +4,29 @@ An OBS lua script to zoom a display-capture source to focus on the mouse.
 
 I made this for my own use when recording videos as I wanted a way to zoom into my IDE when highlighting certain sections of code. My particular setup didn't seem to work very well with the existing zooming solutions so I created this.
 
-Built with OBS v29.1.3
+Built with OBS v32.0.2
 
 Now works on **Windows**, **Linux**, and **Mac**
 
 Inspired by [tryptech](https://github.com/tryptech)'s [obs-zoom-and-follow](https://github.com/tryptech/obs-zoom-and-follow)
 
+### Key Changes from original
+- **Dynamic Source Detection:** Instead of hardcoding a single source ID, the script now iterates through available sources to find a compatible display capture method.
+- **Priority Logic:** Implements a fallback mechanism favoring modern protocols:
+  1. `pipewire-desktop-capture-source` (Wayland/Modern OBS)
+  2. `xcomposite_input` (Standard X11)
+  3. `xshm_input` (Legacy X11)
+- **Wayland Support:** Enables the script to function correctly on distributions using Wayland (via PipeWire), while maintaining X11 compatibility.
+
+## Motivation and Context
+
+On newer Linux distributions (e.g., Linux Mint 22, Fedora, Ubuntu 24.04) running OBS Studio 28+, the previous static check for `monitor_capture` or `xshm_input` often fails, resulting in an empty source list or "Source not found" errors. This update ensures the script works out-of-the-box on both Wayland and X11 sessions.
+
 ## Example
 ![Usage Demo](obs-zoom-to-mouse.gif)
+
+> Linux Mint 22.1 (Xia)
+![Linux Mint 22 Usage Demo](obs-zoom-to-mouse-lm-22.gif)
 
 ## Install
 1. Git clone the repo (or just save a copy of `obs-zoom-to-mouse.lua`)
