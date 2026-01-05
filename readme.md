@@ -26,7 +26,7 @@ On newer Linux distributions (e.g., Linux Mint 22, Fedora, Ubuntu 24.04) running
 ![Usage Demo](obs-zoom-to-mouse.gif)
 
 > Linux Mint 22.1 (Xia)
-![Linux Mint 22 Usage Demo](obs-zoom-to-mouse-lm-22.gif)
+![Linux Mint 22 Usage Demo](thumbnail.webp)
 
 ## Install
 1. Git clone the repo (or just save a copy of `obs-zoom-to-mouse.lua`)
@@ -151,4 +151,3 @@ Note: If you are also using a `transform crop` on the non-display capture source
 Want to support me staying awake long enough to add some more features?
 
 <a href="https://www.buymeacoffee.com/blanksourcecode" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
-
